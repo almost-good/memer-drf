@@ -24,7 +24,7 @@ class ProfileList(APIView):
 
 class ProfileDetail(APIView):
     """
-    Retrieve and update a profile instance.
+    Retrieve, update or delete a profile instance.
     """
     
     serializer_class = ProfileSerializer
