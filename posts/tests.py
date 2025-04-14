@@ -93,3 +93,31 @@ class PostDetailViewTests(APITestCase):
         url = '/posts/999/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+    
+    def test_user_can_update_own_post(self):
+        """
+        Ensure user can update their own post.
+        """
+        
+        self.client.login(username='testuser_one', password='testpassword')
+        url = '/posts/1/'
+        data = {
+            'title': 'Updated User One Post',
+        }
+        response = self.client.put(url, data)
+        post = Post.objects.filter(pk=1).first()
+        self.assertEqual(post.title, 'Updated User One Post') # type: ignore
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_user_cant_update_another_user_post(self):
+        """
+        Ensure user can't update another user's post.
+        """
+        
+        self.client.login(username='testuser_one', password='testpassword')
+        url = '/posts/2/'
+        data = {
+            'title': 'User One updates User Two Post',
+        }
+        response = self.client.put(url, data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
