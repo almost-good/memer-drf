@@ -61,3 +61,31 @@ class ProfileDetailViewTests(APITestCase):
         url = '/profiles/999/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        
+    def test_user_can_update_own_profile(self):
+        """
+        Ensure user can update their own profile.
+        """
+        
+        self.client.login(username='testuser_one', password='testpassword')
+        url = '/profiles/1/'
+        data = {
+            'flair': 'Updated User One Flair',
+        }
+        response = self.client.put(url, data)
+        profile = Profile.objects.filter(pk=1).first()
+        self.assertEqual(profile.flair, 'Updated User One Flair') # type: ignore
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_user_cant_update_another_user_profile(self):
+        """
+        Ensure user can't update another user's profile.
+        """
+        
+        self.client.login(username='testuser_one', password='testpassword')
+        url = '/profiles/2/'
+        data = {
+            'flair': 'User One updates User Two Flair',
+        }
+        response = self.client.put(url, data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
