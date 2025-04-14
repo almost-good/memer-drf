@@ -84,9 +84,9 @@ class PostDetailViewTests(APITestCase):
         self.assertEqual(response.data['title'], 'User One Post') # type: ignore
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
-    def test_can_retrieve_post_using_invalid_id(self):
+    def test_cant_retrieve_post_using_invalid_id(self):
         """
-        Ensure post can be retrieved using a valid ID.
+        Ensure post can't be retrieved using a invalid ID.
         """
         
         url = '/posts/999/'
