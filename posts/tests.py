@@ -14,7 +14,7 @@ class PostListViewTests(APITestCase):
         
     def test_can_list_posts(self):
         """
-        Ensure we can list posts.
+        Ensure posts are listed correctly.
         """
         
         testuser = User.objects.get(username='testuser')
@@ -54,3 +54,42 @@ class PostListViewTests(APITestCase):
         }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class PostDetailViewTests(APITestCase):
+    def setUp(self):
+        testuser_one = User.objects.create_user(
+            username='testuser_one',
+            password='testpassword'
+        )
+        testuser_two = User.objects.create_user(
+            username='testuser_two',
+            password='testpassword'
+        )
+        Post.objects.create(
+            owner=testuser_one,
+            title='User One Post'
+        )
+        Post.objects.create(
+            owner=testuser_two,
+            title='User Two Post'
+        )
+        
+    def test_can_retrieve_post_using_valid_id(self):
+        """
+        Ensure post can be retrieved using a valid ID.
+        """
+        
+        url = '/posts/1/'
+        response = self.client.get(url)
+        self.assertEqual(response.data['title'], 'User One Post') # type: ignore
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+    def test_can_retrieve_post_using_invalid_id(self):
+        """
+        Ensure post can be retrieved using a valid ID.
+        """
+        
+        url = '/posts/999/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
