@@ -13,7 +13,7 @@ class ProfileList(generics.ListCreateAPIView):
     queryset = Profile.objects.all()
 
 
-class ProfileDetail(generics.RetrieveUpdateDestroyAPIView):
+class ProfileDetail(generics.RetrieveUpdateAPIView):
     """
     Retrieve, update or delete a profile instance.
     """
