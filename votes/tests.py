@@ -9,7 +9,7 @@ from rest_framework.test import APITestCase
 
 class VoteListViewTests(APITestCase):
     def setUp(self):
-        user_one = User.objects.create_user(
+        self.user_one = User.objects.create_user(
             username='testuser_one',
             password='testpassword'
         )
@@ -18,23 +18,18 @@ class VoteListViewTests(APITestCase):
             password='testpassword'
         )
         
-        post = Post.objects.create(
-            owner=user_one,
+        self.post = Post.objects.create(
+            owner=self.user_one,
             title='Test Post owned by User One',
         )
-        comment = Comment.objects.create(
-            owner=user_one,
-            post=post,
+        self.post_ct = ContentType.objects.get_for_model(Post)
+        
+        self.comment = Comment.objects.create(
+            owner=self.user_one,
+            post=self.post,
             content='Test Comment owned by User One',
         )
-        
-        post_ct = ContentType.objects.get_for_model(Post)
-        Vote.objects.create(
-            owner=user_one,
-            content_type=post_ct,
-            object_id=post.id, # type: ignore
-            value=1
-        )
+        self.comment_ct = ContentType.objects.get_for_model(Comment)
         
     def test_can_list_votes(self):
         """
@@ -44,3 +39,55 @@ class VoteListViewTests(APITestCase):
         url = '/votes/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_logged_in_user_can_vote_on_post(self):
+        """
+        Ensure logged in user can vote on a post.
+        """
+        
+        self.client.login(username='testuser_two', password='testpassword')
+        
+        url = '/votes/'
+        data = {
+            'content_type': self.post_ct.id, # type: ignore
+            'object_id': self.post.id, # type: ignore
+            'value': 1
+        }
+        
+        response = self.client.post(url, data)
+        count = Vote.objects.count()
+        self.assertEqual(count, 1)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_logged_in_user_can_vote_on_comment(self):
+        """
+        Ensure logged in user can vote on a comment.
+        """
+        
+        self.client.login(username='testuser_two', password='testpassword')
+        
+        url = '/votes/'
+        data = {
+            'content_type': self.comment_ct.id, # type: ignore
+            'object_id': self.comment.id, # type: ignore
+            'value': 1
+        }
+        
+        response = self.client.post(url, data)
+        count = Vote.objects.count()
+        self.assertEqual(count, 1)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_logged_out_user_cannot_vote(self):
+        """
+        Ensure logged out user cannot create a vote.
+        """
+        
+        url = '/votes/'
+        data = {
+            'content_type': self.post_ct.id, # type: ignore
+            'object_id': self.post.id, # type: ignore
+            'value': 1
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
