@@ -62,3 +62,44 @@ class CommentListViewTests(APITestCase):
         }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class CommentDetailViewTests(APITestCase):
+    def setUp(self):
+        testuser_one = User.objects.create_user(
+            username='testuser_one',
+            password='testpassword'
+        )
+        testuser_two = User.objects.create_user(
+            username='testuser_two',
+            password='testpassword'
+        )
+        Post.objects.create(
+            owner=testuser_one,
+            title='User One Post'
+        )
+        Comment.objects.create(
+            owner=testuser_one,
+            post=Post.objects.get(owner=testuser_one),
+            content='User One Comment'
+        )
+
+        
+    def test_can_retrieve_comment_using_valid_id(self):
+        """
+        Ensure comment can be retrieved using a valid ID.
+        """
+        
+        url = '/comments/1/'
+        response = self.client.get(url)
+        self.assertEqual(response.data['content'], 'User One Comment') # type: ignore
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_cant_retrieve_comment_using_invalid_id(self):
+        """
+        Ensure comment can't be retrieved using a invalid ID.
+        """
+        
+        url = '/comments/999/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
