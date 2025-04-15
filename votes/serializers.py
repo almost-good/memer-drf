@@ -32,15 +32,27 @@ class VoteSerializer(serializers.ModelSerializer):
     
     def validate(self, data):
         """
-        Validate that the content type is either Post or Comment.
+        Validate that the content type and object ID are valid.
         """
         
         allowed_models = [Post, Comment]
         allowed_cts = [
             ContentType.objects.get_for_model(model) for model in allowed_models
         ]
+        
+        content_type = data['content_type']
+        object_id = data['object_id']
+        
         if data['content_type'] not in allowed_cts:
             raise serializers.ValidationError(
                 "Votes can only be cast on posts or comments."
             )
+        
+        try:
+            content_type.get_object_for_this_type(pk=object_id)
+        except content_type.model_class().DoesNotExist:
+            raise serializers.ValidationError(
+                "The object you're trying to vote on does not exist."
+            )
+        
         return data
