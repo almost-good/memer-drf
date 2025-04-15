@@ -21,9 +21,9 @@ class VoteList(generics.ListCreateAPIView):
         """
         Create a smart toggle for votes:
         
-            - Vote already exists: update it.
-            - Vote does not exist: create it.
-        -   Vote value is the same: delete it.
+        - Vote already exists: update it.
+        - Vote does not exist: create it.
+        - Vote value is the same: delete it.
         """
         
         serializer = self.get_serializer(data=request.data)

@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.db import IntegrityError
 from django.contrib.contenttypes.models import ContentType
 from .models import Vote
 from posts.models import Post
@@ -43,16 +44,19 @@ class VoteSerializer(serializers.ModelSerializer):
         content_type = data['content_type']
         object_id = data['object_id']
         
-        if data['content_type'] not in allowed_cts:
-            raise serializers.ValidationError(
-                "Votes can only be cast on posts or comments."
-            )
+        if content_type not in allowed_cts:
+            raise serializers.ValidationError({
+                'content_type': "Votes can only be cast on posts or comments."
+            })
         
         try:
             content_type.get_object_for_this_type(pk=object_id)
         except content_type.model_class().DoesNotExist:
-            raise serializers.ValidationError(
-                "The object you're trying to vote on does not exist."
-            )
+            raise serializers.ValidationError({
+                'object_id': "The object you're trying to vote on does not exist."
+            })
         
         return data
+
+    def get_content_type(self, obj):
+        return obj.content_type.model
