@@ -103,3 +103,31 @@ class CommentDetailViewTests(APITestCase):
         url = '/comments/999/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        
+    def test_user_can_update_own_comment(self):
+        """
+        Ensure user can update their own comment.
+        """
+        
+        self.client.login(username='testuser_one', password='testpassword')
+        url = '/comments/1/'
+        data = {
+            'content': 'Updated Own Comment',
+        }
+        response = self.client.put(url, data)
+        comment = Comment.objects.filter(pk=1).first()
+        self.assertEqual(comment.content, 'Updated Own Comment') # type: ignore
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+    def test_user_cant_update_another_user_comment(self):
+        """
+        Ensure user can't update another user's comment.
+        """
+        
+        self.client.login(username='testuser_two', password='testpassword')
+        url = '/comments/1/'
+        data = {
+            'content': 'User Two updates User One Comment',
+        }
+        response = self.client.put(url, data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
