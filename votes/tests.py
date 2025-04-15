@@ -147,3 +147,23 @@ class VoteListViewTests(APITestCase):
 
         self.assertEqual(vote_user_one.value, 1)
         self.assertEqual(vote_user_two.value, -1)
+        
+    def test_user_can_delete_own_vote_if_same_value(self):
+        """
+        Ensure user can delete their own vote if the value is the same.
+        """
+        
+        self.client.login(username='testuser_one', password='testpassword')
+        
+        url = '/votes/'
+        data = {
+            'content_type': self.post_ct.id, # type: ignore
+            'object_id': self.post.id, # type: ignore
+            'value': 1
+        }
+        
+        response = self.client.post(url, data)
+        vote = Vote.objects.filter(pk=1).first()
+        self.assertEqual(vote, None)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(Vote.objects.count(), 0)
