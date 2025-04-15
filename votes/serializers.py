@@ -23,6 +23,13 @@ class VoteSerializer(serializers.ModelSerializer):
             'created_at',
         ]
     
+    def validate_value(self, value):
+        if value not in [1, -1]:
+            raise serializers.ValidationError(
+                "Vote must be 1 (upvote) or -1 (downvote)."
+            )
+        return value
+    
     def validate(self, data):
         """
         Validate that the content type is either Post or Comment.
