@@ -15,3 +15,13 @@ class VoteList(generics.ListCreateAPIView):
     
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+
+class VoteDetail(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update or delete a vote instance.
+    """
+    
+    serializer_class = VoteSerializer
+    permission_classes = [IsOwnerOrReadOnly]
+    queryset = Vote.objects.all()
