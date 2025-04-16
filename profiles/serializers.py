@@ -1,4 +1,7 @@
 from rest_framework import serializers
+
+import followers
+import posts
 from .models import Profile
 from followers.models import Follower
 
@@ -10,6 +13,9 @@ class ProfileSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
     is_owner = serializers.SerializerMethodField()
     following_id = serializers.SerializerMethodField()
+    posts_count = serializers.ReadOnlyField()
+    followers_count = serializers.ReadOnlyField()
+    following_count = serializers.ReadOnlyField()
     
     def get_is_owner(self, obj):
         request = self.context['request']
@@ -35,4 +41,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             'flair',
             'image',
             'following_id',
+            'posts_count',
+            'followers_count',
+            'following_count',
         ]
