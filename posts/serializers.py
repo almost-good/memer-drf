@@ -1,5 +1,7 @@
+from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 from .models import Post
+from votes.models import Vote
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -11,6 +13,8 @@ class PostSerializer(serializers.ModelSerializer):
     is_owner = serializers.SerializerMethodField()
     profile_id = serializers.ReadOnlyField(source='owner.profile.id')
     profile_image = serializers.ReadOnlyField(source='owner.profile.image.url')
+    vote_id = serializers.SerializerMethodField()
+    vote_value = serializers.SerializerMethodField()
     
     def validate_image(self, value):
         if value.size > 2 * 1024 * 1024:
@@ -30,6 +34,24 @@ class PostSerializer(serializers.ModelSerializer):
         request = self.context['request']
         return request.user == obj.owner
     
+    def _get_user_vote(self, obj):
+        user = self.context['request'].user
+        if user.is_authenticated:
+            post_ct = ContentType.objects.get_for_model(Post)
+            vote = Vote.objects.filter(
+                owner=user, content_type=post_ct, object_id=obj.id
+            ).first()
+            return vote
+        return None
+    
+    def get_vote_id(self, obj):
+        vote = self._get_user_vote(obj)
+        return vote.id if vote else None # type: ignore
+    
+    def get_vote_value(self, obj):  
+        vote = self._get_user_vote(obj)
+        return vote.value if vote else None
+    
     class Meta:
         model = Post
         fields = [
@@ -42,4 +64,6 @@ class PostSerializer(serializers.ModelSerializer):
             'updated_at',
             'title',
             'image',
+            'vote_id',
+            'vote_value',
         ]
