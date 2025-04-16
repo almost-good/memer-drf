@@ -1,5 +1,7 @@
 from django.db import models
+from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.auth.models import User
+from votes.models import Vote
 
 
 class Post(models.Model):
@@ -14,6 +16,7 @@ class Post(models.Model):
     image = models.ImageField(
         upload_to='images/', default='../troll-face_fdpdrn', blank=True
     )
+    vote = GenericRelation(Vote, related_query_name='post')
     
     class Meta:
         ordering = ['-created_at']

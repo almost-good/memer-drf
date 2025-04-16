@@ -7,7 +7,7 @@ from .serializers import ProfileSerializer
 from memer_drf.permissions import IsOwnerOrReadOnly
 
 
-class ProfileList(generics.ListCreateAPIView):
+class ProfileList(generics.ListAPIView):
     """
     List all profiles.
     """
@@ -29,7 +29,7 @@ class ProfileList(generics.ListCreateAPIView):
 
 class ProfileDetail(generics.RetrieveUpdateAPIView):
     """
-    Retrieve, update or delete a profile instance.
+    Retrieve or update a profile instance.
     """
 
     serializer_class = ProfileSerializer
