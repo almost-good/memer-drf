@@ -1,18 +1,9 @@
-from django.db.models import Count, Sum, Case, When, IntegerField
+from django.db.models import Count
 from rest_framework import generics, permissions, filters
 from .models import Post
 from .serializers import PostSerializer
 from memer_drf.permissions import IsOwnerOrReadOnly
-
-
-VOTE_SCORE_EXPR = Sum(
-    Case(
-        When(vote__value=1,  then=1),
-        When(vote__value=-1, then=-1),
-        default=0,
-        output_field=IntegerField(),
-    )
-)
+from utils.helper import get_vote_score_expr
 
 
 class PostList(generics.ListCreateAPIView):
@@ -26,7 +17,7 @@ class PostList(generics.ListCreateAPIView):
     queryset = Post.objects.annotate(
         comments_count=Count('comments', distinct=True),
         vote_count=Count("vote", distinct=True),
-        vote_score=VOTE_SCORE_EXPR
+        vote_score=get_vote_score_expr('vote__value')
     ).order_by('-created_at')
     
     filter_backends = [
@@ -53,6 +44,6 @@ class PostDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.annotate(
         comments_count=Count('comments', distinct=True),
         vote_count=Count("vote", distinct=True),
-        vote_score=VOTE_SCORE_EXPR
+        vote_score=get_vote_score_expr('vote__value')
     ).order_by('-created_at')
 
