@@ -1,7 +1,8 @@
-import re
 from django.db import models
+from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.auth.models import User
 from posts.models import Post
+from votes.models import Vote
 
 
 class Comment(models.Model):
@@ -14,6 +15,7 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     content = models.TextField()
+    vote = GenericRelation(Vote, related_query_name='post')    
     
     class Meta:
         ordering = ['-created_at']

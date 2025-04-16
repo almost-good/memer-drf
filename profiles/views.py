@@ -1,7 +1,5 @@
 from django.db.models import Count
 from rest_framework import generics, filters
-
-import posts
 from .models import Profile
 from .serializers import ProfileSerializer
 from memer_drf.permissions import IsOwnerOrReadOnly

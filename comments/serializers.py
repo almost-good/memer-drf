@@ -16,6 +16,8 @@ class CommentSerializer(serializers.ModelSerializer):
     profile_flair = serializers.ReadOnlyField(source='owner.profile.flair')
     vote_id = serializers.SerializerMethodField()
     vote_value = serializers.SerializerMethodField()
+    vote_count = serializers.ReadOnlyField()
+    vote_score = serializers.ReadOnlyField()
     
     def get_is_owner(self, obj):
         request = self.context['request']
@@ -54,6 +56,8 @@ class CommentSerializer(serializers.ModelSerializer):
             'content',
             'vote_id',
             'vote_value',
+            'vote_count',
+            'vote_score',
         ]
 
 

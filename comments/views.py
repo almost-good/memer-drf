@@ -1,7 +1,18 @@
+from django.db.models import Count, Sum, Case, When, IntegerField
 from rest_framework import generics, permissions
 from memer_drf.permissions import IsOwnerOrReadOnly
 from .models import Comment
 from .serializers import CommentSerializer, CommentDetailSerializer
+
+
+VOTE_SCORE_EXPR = Sum(
+    Case(
+        When(vote__value=1,  then=1),
+        When(vote__value=-1, then=-1),
+        default=0,
+        output_field=IntegerField(),
+    )
+)
 
 
 class CommentList(generics.ListCreateAPIView):
@@ -11,7 +22,11 @@ class CommentList(generics.ListCreateAPIView):
     
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    queryset = Comment.objects.all()
+    
+    queryset = Comment.objects.annotate(
+        vote_count = Count("vote", distinct=True),
+        vote_score = VOTE_SCORE_EXPR,
+    ).order_by("-created_at")
     
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -24,4 +39,7 @@ class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     
     serializer_class = CommentDetailSerializer
     permission_classes = [IsOwnerOrReadOnly]
-    queryset = Comment.objects.all()
+    queryset = Comment.objects.annotate(
+        vote_count = Count("vote", distinct=True),
+        vote_score = VOTE_SCORE_EXPR,
+    ).order_by("-created_at")
