@@ -1,5 +1,5 @@
 from django.db.models import Count, Sum, Case, When, IntegerField
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, filters
 from memer_drf.permissions import IsOwnerOrReadOnly
 from .models import Comment
 from .serializers import CommentSerializer, CommentDetailSerializer
@@ -27,6 +27,14 @@ class CommentList(generics.ListCreateAPIView):
         vote_count = Count("vote", distinct=True),
         vote_score = VOTE_SCORE_EXPR,
     ).order_by("-created_at")
+    
+    filter_backends = [
+        filters.OrderingFilter
+    ]
+    ordering_fields = [
+        'vote_count',
+        'vote_score',
+    ]
     
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
