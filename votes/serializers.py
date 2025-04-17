@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from django.db import IntegrityError
 from django.contrib.contenttypes.models import ContentType
 from .models import Vote
 from posts.models import Post

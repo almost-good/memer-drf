@@ -1,7 +1,4 @@
 from rest_framework import serializers
-
-import followers
-import posts
 from .models import Profile
 from followers.models import Follower
 

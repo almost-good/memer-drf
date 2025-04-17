@@ -1,6 +1,5 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
-from memer_drf.permissions import IsOwnerOrReadOnly
 from votes.models import Vote
 from votes.serializers import VoteSerializer
 
