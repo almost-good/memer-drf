@@ -62,10 +62,9 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = 'DEV' in os.environ
 
 ALLOWED_HOSTS = [
-    'localhost', 
-    '127.0.0.1', 
-    'memer-ci.herokuapp.com', 
-    'memer-ci-4df2cf031c89.herokuapp.com'
+    os.environ.get('ALLOWED_HOSTS'),
+    'localhost',
+    '127.0.0.1',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
