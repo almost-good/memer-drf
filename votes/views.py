@@ -8,23 +8,23 @@ class VoteList(generics.ListCreateAPIView):
     """
     List all votes and toggle a vote (smart create/delete/update)
     """
-    
+
     serializer_class = VoteSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = Vote.objects.all()
-    
+
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
     def create(self, request, *args, **kwargs):
         """
         Create a smart toggle for votes:
-        
+
         - Vote already exists: update it.
         - Vote does not exist: create it.
         - Vote value is the same: delete it.
         """
-        
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
@@ -40,18 +40,18 @@ class VoteList(generics.ListCreateAPIView):
             if vote.value == data['value']:
                 vote.delete()
                 return Response(
-                    {'detail': 'Vote removed.'}, 
+                    {'detail': 'Vote removed.'},
                     status=status.HTTP_204_NO_CONTENT
                 )
             else:
                 vote.value = data['value']
                 vote.save()
                 return Response(
-                    self.get_serializer(vote).data, 
+                    self.get_serializer(vote).data,
                     status=status.HTTP_200_OK
                 )
 
         return Response(
-            self.get_serializer(vote).data, 
+            self.get_serializer(vote).data,
             status=status.HTTP_201_CREATED
         )

@@ -8,7 +8,7 @@ class PostSerializer(serializers.ModelSerializer):
     """
     Serializer for the Post model.
     """
-    
+
     owner = serializers.ReadOnlyField(source='owner.username')
     is_owner = serializers.SerializerMethodField()
     profile_id = serializers.ReadOnlyField(source='owner.profile.id')
@@ -18,25 +18,25 @@ class PostSerializer(serializers.ModelSerializer):
     comments_count = serializers.ReadOnlyField()
     vote_count = serializers.ReadOnlyField()
     vote_score = serializers.ReadOnlyField()
-    
+
     def validate_image(self, value):
         if value.size > 2 * 1024 * 1024:
             raise serializers.ValidationError(
                 "Image size exceeds 2MB."
             )
         if (
-            value.image.width > 4096 
+            value.image.width > 4096
             or value.image.height > 4096
         ):
             raise serializers.ValidationError(
                 "Image dimensions exceed 4096x4096."
             )
         return value
-    
+
     def get_is_owner(self, obj):
         request = self.context['request']
         return request.user == obj.owner
-    
+
     def _get_user_vote(self, obj):
         user = self.context['request'].user
         if user.is_authenticated:
@@ -46,15 +46,15 @@ class PostSerializer(serializers.ModelSerializer):
             ).first()
             return vote
         return None
-    
+
     def get_vote_id(self, obj):
         vote = self._get_user_vote(obj)
-        return vote.id if vote else None # type: ignore
-    
-    def get_vote_value(self, obj):  
+        return vote.id if vote else None  # type: ignore
+
+    def get_vote_value(self, obj):
         vote = self._get_user_vote(obj)
         return vote.value if vote else None
-    
+
     class Meta:
         model = Post
         fields = [

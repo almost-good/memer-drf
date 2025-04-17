@@ -17,32 +17,32 @@ class VoteListViewTests(APITestCase):
             username='testuser_two',
             password='testpassword'
         )
-        
+
         self.post = Post.objects.create(
             owner=self.user_one,
             title='Test Post owned by User One',
         )
         self.post_ct = ContentType.objects.get_for_model(Post)
-        
+
         self.comment = Comment.objects.create(
             owner=self.user_one,
             post=self.post,
             content='Test Comment owned by User One',
         )
         self.comment_ct = ContentType.objects.get_for_model(Comment)
-        
+
         Vote.objects.create(
             owner=self.user_one,
             content_type=self.post_ct,
-            object_id=self.post.id, # type: ignore
+            object_id=self.post.id,  # type: ignore
             value=1
         )
-        
+
     def test_can_list_votes(self):
         """
         Ensure votes are listed correctly.
         """
-        
+
         url = '/votes/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -51,16 +51,16 @@ class VoteListViewTests(APITestCase):
         """
         Ensure logged in user can vote on a post.
         """
-        
+
         self.client.login(username='testuser_two', password='testpassword')
-        
+
         url = '/votes/'
         data = {
-            'content_type': self.post_ct.id, # type: ignore
-            'object_id': self.post.id, # type: ignore
+            'content_type': self.post_ct.id,  # type: ignore
+            'object_id': self.post.id,  # type: ignore
             'value': 1
         }
-        
+
         response = self.client.post(url, data)
         count = Vote.objects.count()
         self.assertEqual(count, 2)
@@ -70,16 +70,16 @@ class VoteListViewTests(APITestCase):
         """
         Ensure logged in user can vote on a comment.
         """
-        
+
         self.client.login(username='testuser_two', password='testpassword')
-        
+
         url = '/votes/'
         data = {
-            'content_type': self.comment_ct.id, # type: ignore
-            'object_id': self.comment.id, # type: ignore
+            'content_type': self.comment_ct.id,  # type: ignore
+            'object_id': self.comment.id,  # type: ignore
             'value': 1
         }
-        
+
         response = self.client.post(url, data)
         count = Vote.objects.count()
         self.assertEqual(count, 2)
@@ -89,79 +89,80 @@ class VoteListViewTests(APITestCase):
         """
         Ensure logged out user cannot create a vote.
         """
-        
+
         url = '/votes/'
         data = {
-            'content_type': self.post_ct.id, # type: ignore
-            'object_id': self.post.id, # type: ignore
+            'content_type': self.post_ct.id,  # type: ignore
+            'object_id': self.post.id,  # type: ignore
             'value': 1
         }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        
+
     def test_user_can_update_own_vote(self):
         """
         Ensure user can update their own vote.
         """
-        
+
         self.client.login(username='testuser_one', password='testpassword')
-        
+
         url = '/votes/'
         data = {
-            'content_type': self.post_ct.id, # type: ignore
-            'object_id': self.post.id, # type: ignore
+            'content_type': self.post_ct.id,  # type: ignore
+            'object_id': self.post.id,  # type: ignore
             'value': -1
         }
-        
+
         response = self.client.post(url, data)
         vote = Vote.objects.get(
-            owner=self.user_one, 
-            content_type=self.post_ct, 
-            object_id=self.post.id # type: ignore
+            owner=self.user_one,
+            content_type=self.post_ct,
+            object_id=self.post.id  # type: ignore
         )
-        
-        self.assertEqual(vote.value, -1) # type: ignore
+
+        self.assertEqual(vote.value, -1)  # type: ignore
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
+
     def test_user_cant_affect_another_user_vote_instead_submits_own(self):
         """
-        Ensure user can't affect another user's vote, instead submits their own.
+        Ensure user can't affect another user's vote,
+        instead submits their own.
         """
-        
+
         self.client.login(username='testuser_two', password='testpassword')
-        
+
         url = '/votes/'
         data = {
-            'content_type': self.post_ct.id, # type: ignore
-            'object_id': self.post.id, # type: ignore
+            'content_type': self.post_ct.id,  # type: ignore
+            'object_id': self.post.id,  # type: ignore
             'value': -1
         }
-        
+
         response = self.client.post(url, data)
-        
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Vote.objects.count(), 2)
-        
+
         vote_user_one = Vote.objects.get(owner=self.user_one)
         vote_user_two = Vote.objects.get(owner=self.user_two)
 
         self.assertEqual(vote_user_one.value, 1)
         self.assertEqual(vote_user_two.value, -1)
-        
+
     def test_user_can_delete_own_vote_if_same_value(self):
         """
         Ensure user can delete their own vote if the value is the same.
         """
-        
+
         self.client.login(username='testuser_one', password='testpassword')
-        
+
         url = '/votes/'
         data = {
-            'content_type': self.post_ct.id, # type: ignore
-            'object_id': self.post.id, # type: ignore
+            'content_type': self.post_ct.id,  # type: ignore
+            'object_id': self.post.id,  # type: ignore
             'value': 1
         }
-        
+
         response = self.client.post(url, data)
         vote = Vote.objects.filter(pk=1).first()
         self.assertEqual(vote, None)

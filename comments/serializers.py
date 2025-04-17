@@ -9,7 +9,7 @@ class CommentSerializer(serializers.ModelSerializer):
     """
     Serializer for the Comment model.
     """
-    
+
     owner = serializers.ReadOnlyField(source='owner.username')
     is_owner = serializers.SerializerMethodField()
     profile_id = serializers.ReadOnlyField(source='owner.profile.id')
@@ -21,17 +21,17 @@ class CommentSerializer(serializers.ModelSerializer):
     vote_score = serializers.ReadOnlyField()
     created_at = serializers.SerializerMethodField()
     updated_at = serializers.SerializerMethodField()
-    
+
     def get_is_owner(self, obj):
         request = self.context['request']
         return request.user == obj.owner
-    
+
     def get_created_at(self, obj):
         return naturaltime(obj.created_at)
-    
+
     def get_updated_at(self, obj):
         return naturaltime(obj.updated_at)
-    
+
     def _get_user_vote(self, obj):
         user = self.context['request'].user
         if user.is_authenticated:
@@ -41,15 +41,15 @@ class CommentSerializer(serializers.ModelSerializer):
             ).first()
             return vote
         return None
-    
+
     def get_vote_id(self, obj):
         vote = self._get_user_vote(obj)
-        return vote.id if vote else None # type: ignore
-    
-    def get_vote_value(self, obj):  
+        return vote.id if vote else None  # type: ignore
+
+    def get_vote_value(self, obj):
         vote = self._get_user_vote(obj)
         return vote.value if vote else None
-    
+
     class Meta:
         model = Comment
         fields = [
@@ -74,5 +74,5 @@ class CommentDetailSerializer(CommentSerializer):
     """
     Serializer for Comment model used in detail view.
     """
-    
+
     post = serializers.ReadOnlyField(source='post.id')

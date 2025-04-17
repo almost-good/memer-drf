@@ -10,12 +10,12 @@ class PostListViewTests(APITestCase):
             username='testuser',
             password='testpassword'
         )
-        
+
     def test_can_list_posts(self):
         """
         Ensure posts are listed correctly.
         """
-        
+
         testuser = User.objects.get(username='testuser')
         Post.objects.create(
             owner=testuser,
@@ -24,12 +24,12 @@ class PostListViewTests(APITestCase):
         url = '/posts/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
+
     def test_logged_in_user_can_create_post(self):
         """
         Ensure logged in user can create a post.
         """
-        
+
         self.client.login(username='testuser', password='testpassword')
         url = '/posts/'
         data = {
@@ -45,7 +45,7 @@ class PostListViewTests(APITestCase):
         """
         Ensure logged out user cannot create a post.
         """
-        
+
         url = '/posts/'
         data = {
             'title': 'Test Post',
@@ -73,31 +73,33 @@ class PostDetailViewTests(APITestCase):
             owner=testuser_two,
             title='User Two Post'
         )
-        
+
     def test_can_retrieve_post_using_valid_id(self):
         """
         Ensure post can be retrieved using a valid ID.
         """
-        
+
         url = '/posts/1/'
         response = self.client.get(url)
-        self.assertEqual(response.data['title'], 'User One Post') # type: ignore
+        self.assertEqual(
+            response.data['title'], 'User One Post'  # type: ignore
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
+
     def test_cant_retrieve_post_using_invalid_id(self):
         """
         Ensure post can't be retrieved using a invalid ID.
         """
-        
+
         url = '/posts/999/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-    
+
     def test_user_can_update_own_post(self):
         """
         Ensure user can update their own post.
         """
-        
+
         self.client.login(username='testuser_one', password='testpassword')
         url = '/posts/1/'
         data = {
@@ -105,14 +107,14 @@ class PostDetailViewTests(APITestCase):
         }
         response = self.client.put(url, data)
         post = Post.objects.filter(pk=1).first()
-        self.assertEqual(post.title, 'Updated User One Post') # type: ignore
+        self.assertEqual(post.title, 'Updated User One Post')  # type: ignore
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_user_cant_update_another_user_post(self):
         """
         Ensure user can't update another user's post.
         """
-        
+
         self.client.login(username='testuser_one', password='testpassword')
         url = '/posts/2/'
         data = {
@@ -125,19 +127,19 @@ class PostDetailViewTests(APITestCase):
         """
         Ensure user can delete their own post.
         """
-        
+
         self.client.login(username='testuser_one', password='testpassword')
         url = '/posts/1/'
         response = self.client.delete(url)
         post = Post.objects.filter(pk=1).first()
         self.assertEqual(post, None)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        
+
     def test_user_cant_delete_another_user_post(self):
         """
         Ensure user can't delete another user's post.
         """
-        
+
         self.client.login(username='testuser_one', password='testpassword')
         url = '/posts/2/'
         response = self.client.delete(url)

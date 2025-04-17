@@ -11,16 +11,16 @@ class PostList(generics.ListCreateAPIView):
     """
     List all posts or create a new post.
     """
-    
+
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    
+
     queryset = Post.objects.annotate(
         comments_count=Count('comments', distinct=True),
         vote_count=Count("vote", distinct=True),
         vote_score=get_vote_score_expr('vote__value')
     ).order_by('-created_at')
-    
+
     filter_backends = [
         filters.OrderingFilter,
         filters.SearchFilter,
@@ -44,7 +44,7 @@ class PostList(generics.ListCreateAPIView):
         'vote_score',
         'vote__created_at',
     ]
-    
+
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
@@ -53,7 +53,7 @@ class PostDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     Retrieve, update or delete a post instance.
     """
-    
+
     serializer_class = PostSerializer
     permission_classes = [IsOwnerOrReadOnly]
     queryset = Post.objects.annotate(
@@ -61,4 +61,3 @@ class PostDetail(generics.RetrieveUpdateDestroyAPIView):
         vote_count=Count("vote", distinct=True),
         vote_score=get_vote_score_expr('vote__value')
     ).order_by('-created_at')
-

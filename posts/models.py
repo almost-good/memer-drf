@@ -8,7 +8,7 @@ class Post(models.Model):
     """
     Post model for user posts.
     """
-    
+
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -17,9 +17,9 @@ class Post(models.Model):
         upload_to='images/', default='../troll-face_fdpdrn', blank=True
     )
     vote = GenericRelation(Vote, related_query_name='post')
-    
+
     class Meta:
         ordering = ['-created_at']
-        
+
     def __str__(self):
-        return f'{self.id} {self.owner} - {self.title}' # type: ignore
+        return f'{self.id} {self.owner} - {self.title}'  # type: ignore
